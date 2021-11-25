@@ -3,9 +3,12 @@ const WebSocket = require("ws");
 const wss = new WebSocket.Server({ port: 1428 });
 let gameLoopInterval;
 
+const worldFloor = 600;
 const clients = new Map();
-var player = {width: 100, height: 100, x: 100, y: 550, id: 123, type: 'player'};
+var availableActions = ['jump', 'duck', 'shoot', 'spectate'];
+var player = {width: 100, height: 100, x: 100, y: 550, id: 123, type: 'player', jump: 0 };
 var entities = [];
+var score = 0;
 
 class jumpObstacle {
     constructor(height, width, id) {
@@ -36,49 +39,39 @@ var chanceToSpawn = 500;
 
 wss.on("connection", (ws) => {
     console.log('New connection')
-    
     generateClient(ws)
     ws.send(JSON.stringify(clients.get(ws)))
     
-    gameLoop();
-    
-    // const metadata ={ id: Math.random() * 360 };
-    // clients.set(ws, metadata);
+    if (clients.size == 1) {
+        gameLoop();
+    }
 
-    ws.on("message", (message) => {
-        console.log("Message: " + message)
-        processMessage(ws, message)
+    ws.on('message', (data) => {
+        let message = JSON.parse(data);
+        console.log(message);
+        processEvent(ws, message);
     });
 });
 
-function processMessage(ws, message) {
-    if (message == 'Hello Server!') {
-        console.log("About to send message")
-        ws.send("Test")
+function processEvent(ws, data) {
+    if (data.event == 'jump') {
+        player.jump = 10;
+        console.log("Jump!");
     }
 }
 
 function generateClient(ws) {
     var clientId = Math.floor((Math.random() * 1000) + 1);
-    var availableActions = ['jump', 'duck', 'shoot'];
-
-    [...clients.keys()].forEach(element => {
-        if (element.action == 'jump'){
-            availableActions = availableActions.filter(item => item !== 'jump')
-        }
-        if (element.action == 'duck'){
-            availableActions = availableActions.filter(item => item !== 'duck')
-        }
-        if (element.action == 'shoot'){
-            availableActions = availableActions.filter(item => item !== 'shoot')
-        }
-    });
 
     //TODO Deal with what happens if there's more than 4 people <- It's called spectators :p
     var clientDetails = {
         event: 'startup',
         id: clientId,
         action: availableActions[0]
+    }
+
+    if (availableActions.length > 1) {
+        availableActions.shift();
     }
 
     clients.set(ws, clientDetails)
@@ -90,6 +83,7 @@ function gameLoop() {
 }
 
 function calculateFrame() {
+    score++;
     var spawn = Math.floor((Math.random() * chanceToSpawn) + 1) === 1;
     if (spawn) {
         chanceToSpawn = 500;
@@ -99,19 +93,26 @@ function calculateFrame() {
         chanceToSpawn--;
     }
 
+    if (player.jump > 0) {
+        player.y--;
+        player.jump--;
+    } else if (player.y < worldFloor - (player.height / 2)) {
+        player.y++;
+    }
+
     let isDead = false;
     entities.forEach(entity => {
         entity.move()
         if (entity.collide(player)) {
             isDead = true;
-            console.log("Is Dead");
         }
     });
 
     const frame =  {
         event: 'gameUpdate',
         player: player,
-        obstacles: entities
+        obstacles: entities,
+        score: score
     };
 
     [...clients.keys()].forEach(client => {
@@ -119,6 +120,7 @@ function calculateFrame() {
     });
 
     if (isDead) {
+        console.log("Dead - Game over");
         clearInterval(gameLoopInterval);
         [...clients.keys()].forEach(client => {
             client.send(JSON.stringify({
