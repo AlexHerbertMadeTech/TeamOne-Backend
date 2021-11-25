@@ -11,6 +11,8 @@ var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type:
 var entities = [];
 var score = 0;
 let gameSpeed = 10;
+let backgroundPosition1 = 0;
+let backgroundPosition2 = worldEnd * 2;
 
 class jumpObstacle {
     constructor(height, width, id) {
@@ -101,7 +103,7 @@ function calculateFrame() {
     }
 
     playerJumpLogic();
-
+    
     let isDead = false;
     entities.forEach(entity => {
         entity.move(gameSpeed)
@@ -110,11 +112,22 @@ function calculateFrame() {
         }
     });
 
+    // This is a dodgy hack to get the "infinite" scroll feel
+    backgroundPosition1 -= gameSpeed;
+    backgroundPosition2 -= gameSpeed;
+    if (backgroundPosition1 < -worldEnd) {
+        backgroundPosition1 = backgroundPosition2 + (worldEnd * 2);
+    } else if (backgroundPosition2 < -worldEnd) {
+        backgroundPosition2 = backgroundPosition1 + (worldEnd * 2);
+    }
+
     const frame =  {
         event: 'gameUpdate',
         player: player,
         obstacles: entities,
         score: score,
+        backgroundPosition1: backgroundPosition1,
+        backgroundPosition2: backgroundPosition2,
         actions: {
             jumping: player.jumping,
             ducking: player.ducking,
