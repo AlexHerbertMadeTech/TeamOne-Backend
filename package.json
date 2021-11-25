@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/AlexHerbertMadeTech/TeamOne-Backend/issues"
   },
-  "homepage": "https://github.com/AlexHerbertMadeTech/TeamOne-Backend#readme"
+  "homepage": "https://github.com/AlexHerbertMadeTech/TeamOne-Backend#readme",
+  "dependencies": {
+    "uuidv4": "^6.2.12",
+    "ws": "^8.3.0"
+  }
 }
