@@ -6,8 +6,8 @@ let gameLoopInterval;
 const worldFloor = 400;
 const worldEnd = 1200;
 const clients = new Map();
-var availableActions = ['jump', 'duck', 'shoot', 'spectate'];
-var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumpFrames: 0, jumping: false, jumpSpeed: 0};
+var availableActions = ['jump', 'duck', 'attack', 'spectate'];
+var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0};
 var entities = [];
 var score = 0;
 let gameSpeed = 10;
@@ -59,6 +59,12 @@ function processEvent(ws, data) {
         player.jumpFrames = 12;
         player.jumpSpeed = 12;
         player.jumping = true;
+    } else if (data.event == 'duck' && !player.ducking) {
+        // TODO: Actual ducking logic
+        player.ducking = true;
+    } else if (data.event == 'attacking' && !player.ducking) {
+        // TODO: Actual attacking logic
+        player.attacking = true;
     }
 }
 
@@ -110,7 +116,9 @@ function calculateFrame() {
         obstacles: entities,
         score: score,
         actions: {
-            jumping: player.jumping
+            jumping: player.jumping,
+            ducking: player.ducking,
+            attacking: player.attacking
         }
     };
 
