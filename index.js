@@ -108,7 +108,10 @@ function calculateFrame() {
         event: 'gameUpdate',
         player: player,
         obstacles: entities,
-        score: score
+        score: score,
+        actions: {
+            jumping: player.jumping
+        }
     };
 
     [...clients.keys()].forEach(client => {
