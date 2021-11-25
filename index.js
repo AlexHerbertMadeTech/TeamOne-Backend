@@ -7,9 +7,13 @@ const clients = new Map();
 
 wss.on("connection", (ws) => {
     console.log('New connection')
-
-    const metadata ={ id: Math.random() * 360 };
-    clients.set(ws, metadata);
+    
+    generateClient(ws)
+    ws.send(JSON.stringify(clients.get(ws)))
+    
+    
+    // const metadata ={ id: Math.random() * 360 };
+    // clients.set(ws, metadata);
 
     ws.on("message", (message) => {
         console.log("Message: " + message)
@@ -22,6 +26,28 @@ function processMessage(ws, message) {
         console.log("About to send message")
         ws.send("Test")
     }
+}
+
+function generateClient(ws) {
+    var clientId = Math.floor((Math.random() * 1000) + 1);
+    var availableActions = ['jump', 'duck', 'shoot'];
+    [...clients.keys()].forEach(element => {
+        if (element.action == 'jump'){
+            availableActions = availableActions.filter(item => item !== 'jump')
+        }
+        if (element.action == 'duck'){
+            availableActions = availableActions.filter(item => item !== 'duck')
+        }
+        if (element.action == 'shoot'){
+            availableActions = availableActions.filter(item => item !== 'shoot')
+        }
+    });
+    //TODO Deal with what happens if there's more than 4 people
+    var clientDetails = {
+        id: clientId,
+        action: availableActions[0]
+    }
+    clients.set(ws, clientDetails)
 }
 
 console.log("Application started");
