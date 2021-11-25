@@ -44,6 +44,7 @@ function generateClient(ws) {
     });
     //TODO Deal with what happens if there's more than 4 people
     var clientDetails = {
+        event: 'startup',
         id: clientId,
         action: availableActions[0]
     }
