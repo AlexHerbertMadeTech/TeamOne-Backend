@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/AlexHerbertMadeTech/TeamOne-Backend#readme",
   "dependencies": {
-    "uuidv4": "^6.2.12",
     "ws": "^8.3.0"
   }
 }

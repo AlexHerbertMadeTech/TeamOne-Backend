@@ -6,11 +6,22 @@ const wss = new WebSocket.Server({ port: 1428 });
 const clients = new Map();
 
 wss.on("connection", (ws) => {
-    const id = uuidv4();
-    const color = Math.floor(Math.random() * 360);
-    const metadata = { id, color };
+    console.log('New connection')
 
+    const metadata ={ id: Math.random() * 360 };
     clients.set(ws, metadata);
 
-    ws.on("message", (messageAsString) => {});
+    ws.on("message", (message) => {
+        console.log("Message: " + message)
+        processMessage(ws, message)
+    });
 });
+
+function processMessage(ws, message) {
+    if (message == 'Hello Server!') {
+        console.log("About to send message")
+        ws.send("Test")
+    }
+}
+
+console.log("Application started");
