@@ -21,7 +21,7 @@ class jumpObstacle {
     }
 }
 
-var chanceToSpawn = 1000;
+var chanceToSpawn = 10000;
 
 wss.on("connection", (ws) => {
     console.log('New connection')
@@ -72,7 +72,7 @@ function generateClient(ws) {
 
 function gameLoop() {
     interval = 1000 / 30;
-    setInterval(calculateFrame(), interval);
+    setInterval(calculateFrame, interval);
 
     
 }
@@ -80,7 +80,7 @@ function gameLoop() {
 function calculateFrame() {
     var spawn = Math.floor((Math.random() * chanceToSpawn) + 1) === 1;
     if(spawn){
-        chanceToSpawn = 1000;
+        chanceToSpawn = 10000;
         var id = Math.floor((Math.random() * 1000) + 1);
         entities.push(new jumpObstacle(100, 100, id));
     }else{
@@ -92,13 +92,13 @@ function calculateFrame() {
     });
 
     const frame =  {
-        event: gameUpdate,
+        event: 'gameUpdate',
         player: player,
         obstacles: entities
     };
 
     [...clients.keys()].forEach(client => {
-        client.send(frame)
+        client.send(JSON.stringify(frame))
     });
 }
 
