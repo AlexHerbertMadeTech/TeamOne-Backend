@@ -10,7 +10,7 @@ var availableActions = ['jump', 'duck', 'attack', 'spectate'];
 var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0};
 var entities = [];
 var score = 0;
-let gameSpeed = 10;
+let gameSpeed = 8;
 let backgroundPosition1 = 0;
 let backgroundPosition2 = worldEnd * 2;
 
@@ -58,8 +58,8 @@ wss.on("connection", (ws) => {
 
 function processEvent(ws, data) {
     if (data.event == 'jump' && !player.jumping) {
-        player.jumpFrames = 12;
-        player.jumpSpeed = 12;
+        player.jumpFrames = 14;
+        player.jumpSpeed = 14;
         player.jumping = true;
     } else if (data.event == 'duck' && !player.ducking) {
         // TODO: Actual ducking logic
