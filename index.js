@@ -62,7 +62,7 @@ function processEvent(ws, data) {
     } else if (data.event == 'duck' && !player.ducking) {
         // TODO: Actual ducking logic
         player.ducking = true;
-    } else if (data.event == 'attacking' && !player.ducking) {
+    } else if (data.event == 'attack' && !player.attacking) {
         // TODO: Actual attacking logic
         player.attacking = true;
     }
