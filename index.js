@@ -7,7 +7,7 @@ const worldFloor = 400;
 const worldEnd = 1200;
 const clients = new Map();
 var availableActions = [
-    // 'jump',
+    'jump',
     'duck',
     'attack',
     'spectate'
@@ -36,7 +36,9 @@ class obstacle {
     collide(entity) {
         let r1 = { left: this.x - this.width / 2, right: this.x + this.width / 2, top: this.y - this.height / 2, bottom: this.y + this.height / 2 }
         let r2 = { left: entity.x - entity.width / 2, right: entity.x + entity.width / 2, top: entity.y - entity.height / 2, bottom: entity.y + entity.height / 2 }
-
+        if(entity.ducking){
+            r2.top = (entity.y + worldFloor)/2 - entity.height / 4;
+        };
         return !(r2.left > r1.right || 
             r2.right < r1.left || 
             r2.top > r1.bottom ||
