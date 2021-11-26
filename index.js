@@ -226,3 +226,36 @@ function playerAttackingLogic() {
 }
 
 console.log("Application started");
+
+wss.on("close", (ws) => {
+    const clientValue = clients.get(ws);
+    const clientAction = clientValue.action;
+    availableActions.unshift(clientAction);
+    var obstacleType;
+    var obstacleObject;
+    switch (clientAction) {
+        case 'jump':
+            obstacleType = "jumpObstacle";
+            obstacleObject = jumpObstacle;
+            break;
+        case 'duck':
+            obstacleType = "duckObstacle";
+            obstacleObject = duckObstacle;
+            break;
+        case 'attack':
+            obstacleType = "attackObstacle";
+            obstacleObject = attackObstacle;
+            break;
+        default:
+            clients.delete(ws);
+            break;
+    }
+    availableObstacles.unshift(obstacleObject);
+    obstacles = obstacles.filter((obstacle) => {
+        return !(obstacle.type == obstacleType)
+    })
+    entities = entities.filter((entity) => {
+        return !(entity.type == obstacleType)
+    })
+    clients.delete(ws);
+});
