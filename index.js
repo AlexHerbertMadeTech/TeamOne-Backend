@@ -14,13 +14,13 @@ let gameSpeed = 8;
 let backgroundPosition1 = 0;
 let backgroundPosition2 = worldEnd * 2;
 
-class jumpObstacle {
-    constructor(height, width, id) {
+class obstacle {
+    constructor(height, width, id, type, y) {
         this.height = height;
         this.width = width;
         this.x = worldEnd + (width / 2);
-        this.y = worldFloor - (height / 2 );
-        this.type = 'jumpObstacle';
+        this.y = y;
+        this.type = type;
         this.id = id;
     }
 
@@ -37,6 +37,17 @@ class jumpObstacle {
             r2.top > r1.bottom ||
             r2.bottom < r1.top);
     }
+}
+class jumpObstacle extends obstacle {
+    constructor(height, width, id) {
+        super(height, width, id, 'jumpObstacle', (worldFloor - (height / 2 )));
+    }
+}
+
+class duckObstacle extends obstacle {
+    constructor(height, width, id) {
+        super(height, width, id, 'duckObstacle', (worldFloor - (height / 2 ) - (0.75 * player.height)));
+    };
 }
 
 var chanceToSpawn = 500;
@@ -94,10 +105,13 @@ function gameLoop() {
 function calculateFrame() {
     score++;
     var spawn = Math.floor((Math.random() * chanceToSpawn) + 1) === 1;
+    var obstacles = [jumpObstacle, duckObstacle]
     if (spawn) {
         chanceToSpawn = 500;
         var id = Math.floor((Math.random() * 1000) + 1);
-        entities.push(new jumpObstacle(50, 50, id));
+        const randomObstacle = Math.floor((Math.random() * obstacles.length));
+        let obstacle = obstacles[randomObstacle];
+        entities.push(new obstacle(50, 50, id));
     } else {
         chanceToSpawn--;
     }
