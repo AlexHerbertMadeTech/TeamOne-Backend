@@ -7,12 +7,12 @@ const worldFloor = 400;
 const worldEnd = 1200;
 const clients = new Map();
 var availableActions = [
-    'jump',
-    'duck',
+    // 'jump',
+    // 'duck',
     'attack',
     'spectate'
     ];
-var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0, duckFrames : 0};
+var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0, duckFrames : 0, attackFrames : 0};
 var entities = [];
 var score = 0;
 let gameSpeed = 8;
@@ -57,6 +57,12 @@ class duckObstacle extends obstacle {
     };
 }
 
+class attackObstacle extends obstacle {
+    constructor(height, width, id) {
+        super(height * 4, width, id, 'attackObstacle', (worldFloor - (height / 2 )));
+    };
+}
+
 var chanceToSpawn = 500;
 
 wss.on("connection", (ws) => {
@@ -83,7 +89,7 @@ function processEvent(ws, data) {
         player.duckFrames = 38;
         player.ducking = true;
     } else if (data.event == 'attack' && !isPlayerDoingAction()) {
-        // TODO: Actual attacking logic
+        player.attackFrames = 15
         player.attacking = true;
     }
 }
@@ -116,7 +122,11 @@ function gameLoop() {
 function calculateFrame() {
     score++;
     var spawn = Math.floor((Math.random() * chanceToSpawn) + 1) === 1;
-    var obstacles = [jumpObstacle, duckObstacle]
+    var obstacles = [
+        jumpObstacle, 
+        duckObstacle,
+        attackObstacle
+    ]
     if (spawn) {
         chanceToSpawn = 500;
         var id = Math.floor((Math.random() * 1000) + 1);
@@ -129,6 +139,7 @@ function calculateFrame() {
 
     playerJumpLogic();
     playerDuckLogic();
+    playerAttackingLogic();
     
     let isDead = false;
     entities.forEach(entity => {
@@ -195,6 +206,19 @@ function playerDuckLogic() {
         player.duckFrames--;
     } else if (player.duckFrames == 0) {
         player.ducking = false;
+    }
+}
+
+function playerAttackingLogic() {
+    if (player.attacking) {
+        if (player.attackFrames > 0) {
+            player.attackFrames--;
+            entities = entities.filter((entity) => {
+                return !(entity.type == "attackObstacle" && entity.x < player.x + 150)
+            })
+        } else {
+            player.attacking = false;
+        }
     }
 }
 
