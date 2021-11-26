@@ -5,19 +5,14 @@ let gameLoopInterval;
 
 const worldFloor = 400;
 const worldEnd = 1200;
-const clients = new Map();
-var availableActions = [
-    'jump',
-    'duck',
-    'attack',
-    'spectate'
-    ];
-var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0, duckFrames : 0, attackFrames : 0};
-var entities = [];
-var score = 0;
-let gameSpeed = 8;
-let backgroundPosition1 = 0;
-let backgroundPosition2 = worldEnd * 2;
+let clients;
+var availableActions;
+var player;
+var entities;
+var score;
+let gameSpeed;
+let backgroundPosition1;
+let backgroundPosition2;
 
 class obstacle {
     constructor(height, width, id, type, y) {
@@ -63,13 +58,11 @@ class attackObstacle extends obstacle {
     };
 }
 
-var chanceToSpawn = 500;
-var obstacles = [];
-var availableObstacles = [
-    jumpObstacle, 
-    duckObstacle,
-    attackObstacle
-];
+var chanceToSpawn;
+var obstacles;
+var availableObstacles;
+
+resetGame();
 
 wss.on("connection", (ws) => {
     console.log('New connection')
@@ -85,6 +78,30 @@ wss.on("connection", (ws) => {
         processEvent(ws, message);
     });
 });
+
+function resetGame() {
+    clients = new Map();
+    availableActions = [
+        'jump',
+        'duck',
+        'attack',
+        'spectate'
+        ];
+    player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0, duckFrames : 0, attackFrames : 0};
+    entities = [];
+    score = 0;
+    gameSpeed = 8;
+    backgroundPosition1 = 0;
+    backgroundPosition2 = worldEnd * 2;
+
+    chanceToSpawn = 500;
+    obstacles = [];
+    availableObstacles = [
+        jumpObstacle, 
+        duckObstacle,
+        attackObstacle
+    ];
+}
 
 function processEvent(ws, data) {
     if (data.event == 'jump' && !isPlayerDoingAction()) {
@@ -187,6 +204,8 @@ function calculateFrame() {
                 event: "death"
             }));
         });
+        
+        resetGame();
     }
 }
 
@@ -248,7 +267,7 @@ wss.on("close", (ws) => {
             break;
         default:
             clients.delete(ws);
-            break;
+            break; 
     }
     availableObstacles.unshift(obstacleObject);
     obstacles = obstacles.filter((obstacle) => {
