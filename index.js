@@ -7,8 +7,8 @@ const worldFloor = 400;
 const worldEnd = 1200;
 const clients = new Map();
 var availableActions = [
-    // 'jump',
-    // 'duck',
+    'jump',
+    'duck',
     'attack',
     'spectate'
     ];
@@ -64,6 +64,12 @@ class attackObstacle extends obstacle {
 }
 
 var chanceToSpawn = 500;
+var obstacles = [];
+var availableObstacles = [
+    jumpObstacle, 
+    duckObstacle,
+    attackObstacle
+];
 
 wss.on("connection", (ws) => {
     console.log('New connection')
@@ -108,6 +114,8 @@ function generateClient(ws) {
     }
 
     if (availableActions.length > 1) {
+        obstacles.push(availableObstacles[0]);
+        availableObstacles.shift();
         availableActions.shift();
     }
 
@@ -122,11 +130,6 @@ function gameLoop() {
 function calculateFrame() {
     score++;
     var spawn = Math.floor((Math.random() * chanceToSpawn) + 1) === 1;
-    var obstacles = [
-        jumpObstacle, 
-        duckObstacle,
-        attackObstacle
-    ]
     if (spawn) {
         chanceToSpawn = 500;
         var id = Math.floor((Math.random() * 1000) + 1);
