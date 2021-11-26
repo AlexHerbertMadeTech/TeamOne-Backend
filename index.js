@@ -59,8 +59,10 @@ class attackObstacle extends obstacle {
 }
 
 var chanceToSpawn;
+var maxChanceToSpawn;
 var obstacles;
 var availableObstacles;
+var minChanceToSpawn = 100;
 
 resetGame();
 
@@ -94,7 +96,9 @@ function resetGame() {
     backgroundPosition1 = 0;
     backgroundPosition2 = worldEnd * 2;
 
-    chanceToSpawn = 500;
+    chanceToSpawn = 300;
+    maxChanceToSpawn = 300;
+    
     obstacles = [];
     availableObstacles = [
         jumpObstacle, 
@@ -146,17 +150,11 @@ function gameLoop() {
 
 function calculateFrame() {
     score++;
-    var spawn = Math.floor((Math.random() * chanceToSpawn) + 1) === 1;
-    if (spawn) {
-        chanceToSpawn = 500;
-        var id = Math.floor((Math.random() * 1000) + 1);
-        const randomObstacle = Math.floor((Math.random() * obstacles.length));
-        let obstacle = obstacles[randomObstacle];
-        entities.push(new obstacle(50, 50, id));
-    } else {
-        chanceToSpawn--;
+    if (score % 500 == 0) {
+        gameSpeed++;
     }
-
+    
+    doSpawnLogic()
     playerJumpLogic();
     playerDuckLogic();
     playerAttackingLogic();
@@ -206,6 +204,25 @@ function calculateFrame() {
         });
         
         resetGame();
+    }
+}
+
+function doSpawnLogic() {
+    var spawn = Math.floor((Math.random() * chanceToSpawn) + 1) === 1;
+    if (spawn) {
+        chanceToSpawn = maxChanceToSpawn;
+        if (maxChanceToSpawn > minChanceToSpawn) {
+            maxChanceToSpawn-=10;
+            console.log("Spawn Chance: "+ chanceToSpawn)
+        } else {
+            console.log("Min chance achieved!")
+        }
+        var id = Math.floor((Math.random() * 1000) + 1);
+        const randomObstacle = Math.floor((Math.random() * obstacles.length));
+        let obstacle = obstacles[randomObstacle];
+        entities.push(new obstacle(50, 50, id));
+    } else {
+        chanceToSpawn--;
     }
 }
 
