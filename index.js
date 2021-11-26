@@ -6,8 +6,13 @@ let gameLoopInterval;
 const worldFloor = 400;
 const worldEnd = 1200;
 const clients = new Map();
-var availableActions = ['jump', 'duck', 'attack', 'spectate'];
-var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0};
+var availableActions = [
+    // 'jump',
+    'duck',
+    'attack',
+    'spectate'
+    ];
+var player = {width: 50, height: 100, x: 100, y: worldFloor - 50, id: 123, type: 'player', jumping: false, ducking: false, attacking: false, jumpSpeed: 0, jumpFrames: 0, duckFrames : 0};
 var entities = [];
 var score = 0;
 let gameSpeed = 8;
@@ -68,17 +73,21 @@ wss.on("connection", (ws) => {
 });
 
 function processEvent(ws, data) {
-    if (data.event == 'jump' && !player.jumping) {
+    if (data.event == 'jump' && !isPlayerDoingAction()) {
         player.jumpFrames = 14;
         player.jumpSpeed = 14;
         player.jumping = true;
-    } else if (data.event == 'duck' && !player.ducking) {
-        // TODO: Actual ducking logic
+    } else if (data.event == 'duck' && !isPlayerDoingAction()) {
+        player.duckFrames = 38;
         player.ducking = true;
-    } else if (data.event == 'attack' && !player.attacking) {
+    } else if (data.event == 'attack' && !isPlayerDoingAction()) {
         // TODO: Actual attacking logic
         player.attacking = true;
     }
+}
+
+function isPlayerDoingAction() {
+    return player.jumping || player.ducking || player.attacking
 }
 
 function generateClient(ws) {
@@ -117,6 +126,7 @@ function calculateFrame() {
     }
 
     playerJumpLogic();
+    playerDuckLogic();
     
     let isDead = false;
     entities.forEach(entity => {
@@ -175,6 +185,14 @@ function playerJumpLogic() {
     } else {
         player.jumping = false;
         player.jumpSpeed = 0;
+    }
+}
+
+function playerDuckLogic() {
+    if (player.duckFrames > 0) {
+        player.duckFrames--;
+    } else if (player.duckFrames == 0) {
+        player.ducking = false;
     }
 }
 
